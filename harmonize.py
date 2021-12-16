@@ -290,7 +290,7 @@ def averageimage():
 ######### Now that weve defined our RGB values as bytes, we define how we pull values from the video analyzer output
 def cv2input_to_buffer(): ######### Section opens the device, sets buffer, pulls W/H
     global w,h,rgbframe, channels
-    cap = cv2.VideoCapture(0) #variable cap is our raw video input
+    cap = cv2.VideoCapture(1, cv2.CAP_V4L2) #variable cap is our raw video input. This is specific to a jetson that also has a camera installed on video0
     if cap.isOpened(): # Try to get the first frame
         verbose('Capture Device Opened')
     else: #Makes sure we can access the device
@@ -300,7 +300,7 @@ def cv2input_to_buffer(): ######### Section opens the device, sets buffer, pulls
     verbose('Video Shape is: ', w, h) #prints video shape
 
 ########## This section loops & pulls re-colored frames and alwyas get the newest frame 
-    cap.set(cv2.CAP_PROP_BUFFERSIZE,0) # No frame buffer to avoid lagging, always grab newest frame
+    cap.set(cv2.CAP_PROP_BUFFERSIZE,1) # No frame buffer to avoid lagging, always grab newest frame
     ct = 0 ######ct code grabs every X frame as indicated below
     while not stopped:
         ct += 1
@@ -348,11 +348,11 @@ try:
         threads = list()
         verbose("Starting cv2input...")
         try:
-            subprocess.check_output("ls -ltrh /dev/video0",shell=True)
+            subprocess.check_output("ls -ltrh /dev/video1",shell=True)
         except subprocess.CalledProcessError:                                                                                                  
-            print("--- ERROR: Video capture card not detected on /dev/video0 ---")
+            print("--- ERROR: Video capture card not detected on /dev/video1 ---")
         else:
-            print("--- INFO: Detected video capture card on /dev/video0 ---")
+            print("--- INFO: Detected video capture card on /dev/video1 ---")
             t = threading.Thread(target=cv2input_to_buffer)
             t.start()
             threads.append(t)
