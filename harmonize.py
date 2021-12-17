@@ -289,7 +289,7 @@ def averageimage():
             rgb[x] = cv2.mean(area[x])
         for x, c in rgb.items():
             xy = convert.rgb_to_xy(c[0],c[1],c[2])
-            rgb_with_brightness = convert.xy_to_rgb(xy[0],xy[1],bri=.5)
+            rgb_with_brightness = convert.xy_to_rgb(xy[0],xy[1],bri=1)
             #rgb_with_brightness = bytes.fromhex(convert.xy_to_hex(xy[0],xy[1],bri=.5))
             rgb_bytes[x] = bytearray([int(rgb_with_brightness[0]/2), int(rgb_with_brightness[0]/2), int(rgb_with_brightness[1]/2), int(rgb_with_brightness[1]/2), int(rgb_with_brightness[2]/2), int(rgb_with_brightness[2]/2),] )
 
