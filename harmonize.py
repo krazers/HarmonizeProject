@@ -257,7 +257,7 @@ def averageimage():
 #### This section assigns light locations to variable light1,2,3...etc. in JSON order
     avgsize = w/2 + h/2
     verbose('avgsize is', avgsize)
-    breadth = .15 #approx percent of the screen outside the location to capture
+    breadth = .30 #approx percent of the screen outside the location to capture
     dist = int(breadth*avgsize) #Proportion of the pixels we want to average around in relation to the video size
     verbose('Distance from relative location is: ', dist)
 
