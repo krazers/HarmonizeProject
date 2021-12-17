@@ -27,6 +27,12 @@ import threading
 import fileinput
 import numpy as np
 import cv2
+import math
+
+#import config_utils
+#import IPCUtils as ipc_utils
+#ipc_utils.IPCUtils().publish_results_to_pubsub_ipc(PAYLOAD)
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-v","--verbose", dest="verbose", action="store_true")
@@ -231,6 +237,39 @@ def stdin_to_buffer():
 ######################################################
 
 ######################################################
+### Convert RGB to X Y to support Brightness #####
+######################################################
+def convertRGBtoXY(rgb):
+    red = int(rgb[0])
+    green = int(rgb[1])
+    blue = int(rgb[2])
+
+    redC =  (red / 255)
+    greenC = (green / 255)
+    blueC = (blue / 255)
+
+
+    redN = math.pow((redC + 0.055) / (1.0 + 0.055), 2.4) if (redC > 0.04045) else (redC / 12.92)
+    greenN = math.pow((greenC + 0.055) / (1.0 + 0.055), 2.4) if (greenC > 0.04045) else (greenC / 12.92)
+    blueN = math.pow((blueC + 0.055) / (1.0 + 0.055), 2.4) if (blueC > 0.04045) else (blueC / 12.92)
+    
+    X = redN * 0.664511 + greenN * 0.154324 + blueN * 0.162028;
+
+    Y = redN * 0.283881 + greenN * 0.668433 + blueN * 0.047685;
+
+    Z = redN * 0.000088 + greenN * 0.072310 + blueN * 0.986039;
+
+    x = X / (X + Y + Z);
+
+    y = Y / (X + Y + Z);
+
+    X = x * 65536 
+    Y = y * 65536
+    B = .5
+    return bytearray([int(X), int(X), int(Y), int(Y), int(B), int(B),] )
+
+
+######################################################
 ### Scaling light locations and averaging colors #####
 ######################################################
 
@@ -281,7 +320,6 @@ def averageimage():
             rgb[x] = cv2.mean(area[x])
         for x, c in rgb.items():
             rgb_bytes[x] = bytearray([int(c[0]/2), int(c[0]/2), int(c[1]/2), int(c[1]/2), int(c[2]/2), int(c[2]/2),] )
-            
 
 ######################################################
 ############ Video Capture Setup #####################
@@ -330,7 +368,8 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
             message += b'\0\0' + bytes(chr(int(1)), 'utf-8') + single_light_bytes
         else:
             for i in rgb_bytes:
-                message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
+                #message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
+                message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + convertRGBtoXY(rgb_bytes[i])
  
         bufferlock.release()
         proc.stdin.write(message.decode('utf-8','ignore'))
