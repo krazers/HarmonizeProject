@@ -288,7 +288,10 @@ def averageimage():
             area[x] = rgbframe[bds[0]:bds[1], bds[2]:bds[3], :]
             rgb[x] = cv2.mean(area[x])
         for x, c in rgb.items():
-            rgb_bytes[x] = bytearray([int(c[0]/2), int(c[0]/2), int(c[1]/2), int(c[1]/2), int(c[2]/2), int(c[2]/2),] )
+            xy = convert.rgb_to_xy(c[0],c[1],c[2])
+            rgb_with_brightness = convert.xy_to_rgb(xy[0],xy[1],bri=.5)
+            #rgb_with_brightness = bytes.fromhex(convert.xy_to_hex(xy[0],xy[1],bri=.5))
+            rgb_bytes[x] = bytearray([int(rgb_with_brightness[0]/2), int(rgb_with_brightness[0]/2), int(rgb_with_brightness[1]/2), int(rgb_with_brightness[1]/2), int(rgb_with_brightness[2]/2), int(rgb_with_brightness[2]/2),] )
 
 ######################################################
 ############ Video Capture Setup #####################
@@ -338,8 +341,7 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
         else:
             for i in rgb_bytes:
                 #message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
-                xy = convert.rgb_to_xy(rgb_bytes[i][0],rgb_bytes[i][1],rgb_bytes[i][2])
-                message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + bytes.fromhex(convert.xy_to_hex(xy[0],xy[1],bri=.5))
+                message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
  
         bufferlock.release()
         proc.stdin.write(message.decode('utf-8','ignore'))
