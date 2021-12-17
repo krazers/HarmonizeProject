@@ -339,7 +339,7 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
             for i in rgb_bytes:
                 #message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
                 xy = convert.rgb_to_xy(rgb_bytes[i][0],rgb_bytes[i][1],rgb_bytes[i][2])
-                message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + convert.xy_to_hex(xy[0],xy[1],.5)
+                message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + bytes.fromhex(convert.xy_to_hex(xy[0],xy[1],bri=.5))
  
         bufferlock.release()
         proc.stdin.write(message.decode('utf-8','ignore'))
