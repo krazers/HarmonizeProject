@@ -80,5 +80,4 @@ json=$(jq --null-input \
 echo ${json//<component_name>/$component_name} > ~/GreengrassCore/recipes/$component_name-$component_version.json
 /greengrass/v2/bin/greengrass-cli create-component-version --inline-recipe fileb://~/GreengrassCore/recipes/$component_name-$component_version.json
 
-
 echo "###############################################################################"
