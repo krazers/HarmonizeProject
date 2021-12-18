@@ -1,0 +1,83 @@
+###############################################################################
+## Global Parameters                                                         ##
+###############################################################################
+export region=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
+export acct_num=$(aws sts get-caller-identity --query "Account" --output text)
+export component_version=1.0.0
+
+# CF parameters
+export demo_name="philipshue"
+#export statustopic="flightdata/status"
+export artifact_bucket_name=$demo_name-component-artifacts-$acct_num-$region
+
+###############################################################################
+## Prereqs                                                                   ##
+###############################################################################
+echo "###############################################################################"
+echo "## Setup prerequisites..."
+sudo yum install jq -y
+
+###############################################################################
+## Create component that sets up S3 streams in  Stream Manager               ##
+## This includes a low and high priority stream. In addition, it monitors    ##
+## data transfer state changes from another stream and sends the results to  ##
+## IoT Core on topic 'flightdata/status'                                     ##
+###############################################################################
+
+echo "###############################################################################"
+echo "## Create Philip Hue Sync Component for Greengrass..."
+
+# export variables
+export component_name=com.azer.philipshue.sync
+
+# Create artifact for component
+mkdir -p ~/GreengrassCore/artifacts/$component_name/$component_version
+cp HarmonizeProject/* ~/GreengrassCore/artifacts/$component_name/$component_version -r
+(cd ~/GreengrassCore/artifacts/$component_name/$component_version/; zip -m -r $component_name.zip * )
+
+# and copy the artifacts to S3
+aws s3 sync ~/GreengrassCore/ s3://$artifact_bucket_name/
+
+# create recipe for component
+mkdir -p ~/GreengrassCore/recipes/
+cat ~/GreengrassCore/recipes/$component_name-$component_version.json
+
+uri=s3://$artifact_bucket_name/artifacts/$component_name/$component_version/$component_name.zip
+script="python3 -u {artifacts:decompressedPath}/$component_name/harmonize.py"
+json=$(jq --null-input \
+  --arg component_name "$component_name" \
+  --arg component_version "$component_version" \
+  --arg script "$script" \
+  --arg uri "$uri" \
+'{ "RecipeFormatVersion": "2020-01-25", 
+"ComponentName": $component_name, 
+"ComponentVersion": $component_version, 
+"ComponentDescription": "A component that monitors /dev/video1 source to identify colors and change philips hue light colors respectively", 
+"ComponentPublisher": "Azer",
+"ComponentConfiguration": {
+    "DefaultConfiguration": {
+      "accessControl": {
+        "aws.greengrass.ipc.mqttproxy": {
+          "<component_name>:mqttproxy:1": {
+            "policyDescription": "Allows access to subscribe to command topic",
+            "operations": [
+              "aws.greengrass#SubscribeToIoTCore"
+            ],
+            "resources": [
+              "philips/cmd
+            ]
+          }
+        }
+      }
+    }
+},
+"Manifests": [ { "Platform": { "os": "linux" }, 
+"Lifecycle": { "Run": $script }, 
+"Artifacts": [ { "URI": $uri, 
+"Unarchive": "ZIP", "Permission": { "Read": "ALL", "Execute": "NONE" } } ] } ] }')
+
+# Create recipe file and component in Greengrass
+echo ${json//<component_name>/$component_name} > ~/GreengrassCore/recipes/$component_name-$component_version.json
+aws greengrassv2 create-component-version --inline-recipe fileb://~/GreengrassCore/recipes/$component_name-$component_version.json
+
+echo "###############################################################################"
