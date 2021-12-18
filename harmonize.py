@@ -316,17 +316,14 @@ def cv2input_to_buffer(): ######### Section opens the device, sets buffer, pulls
         ct += 1
         ret = cap.grab() #constantly grabs frames
         if ct % 1 == 0: # Skip frames (1=don't skip,2=skip half,3=skip 2/3rds)
-            try:
-                ret, bgrframe = cap.retrieve() #processes most recent frame
-                if is_single_light:
-                    channels = cv2.mean(bgrframe)
-                else:
-                    rgbframe = cv2.cvtColor(bgrframe, cv2.COLOR_BGR2RGB) #corrects BGR to RGB
-                    #verbose('BGrframe is :',bgrframe)
-                if not ret: break
-            except Exception as ex:
-                break
-                pass
+            break
+            ret, bgrframe = cap.retrieve() #processes most recent frame
+            if is_single_light:
+                channels = cv2.mean(bgrframe)
+            else:
+                rgbframe = cv2.cvtColor(bgrframe, cv2.COLOR_BGR2RGB) #corrects BGR to RGB
+                #verbose('BGrframe is :',bgrframe)
+            if not ret: break
 
 
 ######################################################
