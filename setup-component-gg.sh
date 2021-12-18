@@ -35,6 +35,8 @@ mkdir -p ~/GreengrassCore/artifacts/$component_name/$component_version
 cp * ~/GreengrassCore/artifacts/$component_name/$component_version -r
 (cd ~/GreengrassCore/artifacts/$component_name/$component_version/; zip -m -r $component_name.zip * )
 
+aws s3 mb s3://$artifact_bucket_name
+
 # and copy the artifacts to S3
 aws s3 sync ~/GreengrassCore/ s3://$artifact_bucket_name/
 
