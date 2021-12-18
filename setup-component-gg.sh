@@ -1,7 +1,7 @@
 ###############################################################################
 ## Global Parameters                                                         ##
 ###############################################################################
-export region=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | jq -r .region)
+export region=us-west-2
 export acct_num=$(aws sts get-caller-identity --query "Account" --output text)
 export component_version=1.0.0
 
