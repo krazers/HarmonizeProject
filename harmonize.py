@@ -316,13 +316,17 @@ def cv2input_to_buffer(): ######### Section opens the device, sets buffer, pulls
         ct += 1
         ret = cap.grab() #constantly grabs frames
         if ct % 1 == 0: # Skip frames (1=don't skip,2=skip half,3=skip 2/3rds)
-            ret, bgrframe = cap.retrieve() #processes most recent frame
-            if is_single_light:
-                channels = cv2.mean(bgrframe)
-            else:
-                rgbframe = cv2.cvtColor(bgrframe, cv2.COLOR_BGR2RGB) #corrects BGR to RGB
-                #verbose('BGrframe is :',bgrframe)
+            try:
+                ret, bgrframe = cap.retrieve() #processes most recent frame
+                if is_single_light:
+                    channels = cv2.mean(bgrframe)
+                else:
+                    rgbframe = cv2.cvtColor(bgrframe, cv2.COLOR_BGR2RGB) #corrects BGR to RGB
+                    #verbose('BGrframe is :',bgrframe)
+            except Exception as ex:
+                pass
             if not ret: break
+
 
 ######################################################
 ############## Sending the messages ##################
@@ -340,7 +344,6 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
             message += b'\0\0' + bytes(chr(int(1)), 'utf-8') + single_light_bytes
         else:
             for i in rgb_bytes:
-                #message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
                 message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
  
         bufferlock.release()
