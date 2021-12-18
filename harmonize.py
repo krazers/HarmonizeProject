@@ -313,11 +313,15 @@ def cv2input_to_buffer(): ######### Section opens the device, sets buffer, pulls
     cap.set(cv2.CAP_PROP_BUFFERSIZE,1) # No frame buffer to avoid lagging, always grab newest frame
     ct = 0 ######ct code grabs every X frame as indicated below
     while not stopped:
+        time.sleep(1)
         ct += 1
+        print("1")
         ret = cap.grab() #constantly grabs frames
+        print("2")
         if ct % 1 == 0: # Skip frames (1=don't skip,2=skip half,3=skip 2/3rds)
-            break
+            print("3")
             ret, bgrframe = cap.retrieve() #processes most recent frame
+            print("4")
             if is_single_light:
                 channels = cv2.mean(bgrframe)
             else:
