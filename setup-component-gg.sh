@@ -32,7 +32,7 @@ export component_name=com.azer.philipshue.sync
 
 # Create artifact for component
 mkdir -p ~/GreengrassCore/artifacts/$component_name/$component_version
-cp HarmonizeProject/* ~/GreengrassCore/artifacts/$component_name/$component_version -r
+cp * ~/GreengrassCore/artifacts/$component_name/$component_version -r
 (cd ~/GreengrassCore/artifacts/$component_name/$component_version/; zip -m -r $component_name.zip * )
 
 # and copy the artifacts to S3
@@ -64,7 +64,7 @@ json=$(jq --null-input \
               "aws.greengrass#SubscribeToIoTCore"
             ],
             "resources": [
-              "philips/cmd
+              "philips/cmd"
             ]
           }
         }
@@ -79,5 +79,6 @@ json=$(jq --null-input \
 # Create recipe file and component in Greengrass
 echo ${json//<component_name>/$component_name} > ~/GreengrassCore/recipes/$component_name-$component_version.json
 aws greengrassv2 create-component-version --inline-recipe fileb://~/GreengrassCore/recipes/$component_name-$component_version.json
+
 
 echo "###############################################################################"
