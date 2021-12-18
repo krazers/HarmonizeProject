@@ -323,9 +323,10 @@ def cv2input_to_buffer(): ######### Section opens the device, sets buffer, pulls
                 else:
                     rgbframe = cv2.cvtColor(bgrframe, cv2.COLOR_BGR2RGB) #corrects BGR to RGB
                     #verbose('BGrframe is :',bgrframe)
+                if not ret: break
             except Exception as ex:
+                break
                 pass
-            if not ret: break
 
 
 ######################################################
