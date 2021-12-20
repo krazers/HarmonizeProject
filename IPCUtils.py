@@ -167,11 +167,11 @@ class StreamHandler(client.SubscribeToTopicStreamHandler):
 
 
 # Get the ipc client
-#try:
-ipc_client = client.GreengrassCoreIPCClient(IPCUtils().connect())
-config_utils.logger.info("Created IPC client...")
-#except Exception as e:
-#    config_utils.logger.error(
-#        "Exception occured during the creation of an IPC client: {}".format(e)
-#    )
-#    exit(1)
+try:
+    ipc_client = client.GreengrassCoreIPCClient(IPCUtils().connect())
+    config_utils.logger.info("Created IPC client...")
+except Exception as e:
+    config_utils.logger.error(
+        "Exception occured during the creation of an IPC client: {}".format(e)
+    )
+    exit(1)
