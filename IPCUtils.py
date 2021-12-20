@@ -22,7 +22,10 @@ from awsiot.greengrasscoreipc.model import (
     PublishToTopicRequest,
     PublishMessage,
     JsonMessage,
-    SubscribeToConfigurationUpdateRequest,
+    GetThingShadowRequest,
+    UpdateThingShadowRequest,
+    SubscribeToTopicRequest,
+    SubscriptionResponseMessage
 )
 
 
@@ -89,61 +92,77 @@ class IPCUtils:
         except Exception as e:
             config_utils.logger.error("Exception occured during publish: {}".format(e))
 
+    def subscribe_to_cloud(self, topic):
+        request = SubscribeToTopicRequest()
+        request.topic = topic
+        handler = StreamHandler()
+        operation = ipc_client.new_subscribe_to_topic(handler) 
+        future = operation.activate(request)
+        future.result(config_utils.TIMEOUT)
 
-    def get_configuration(self):
-        r"""
-        Ipc client creates a request and activates the operation to get the configuration of
-        inference component passed in its recipe.
-
-        :return: A dictionary object of DefaultConfiguration from the recipe.
-        """
-        try:
-            request = GetConfigurationRequest()
-            operation = ipc_client.new_get_configuration()
-            operation.activate(request).result(config_utils.TIMEOUT)
-            result = operation.get_response().result(config_utils.TIMEOUT)
-            return result.value
+    
+    def sample_get_thing_shadow_request(thingName, shadowName):
+        try:                    
+            # create the GetThingShadow request
+            get_thing_shadow_request = GetThingShadowRequest()
+            get_thing_shadow_request.thing_name = thingName
+            get_thing_shadow_request.shadow_name = shadowName
+            
+            # retrieve the GetThingShadow response after sending the request to the IPC server
+            op = ipc_client.new_get_thing_shadow()
+            op.activate(get_thing_shadow_request)
+            fut = op.get_response()
+            
+            result = fut.result(config_utils.TIMEOUT)
+            return result.payload
+            
         except Exception as e:
             config_utils.logger.error(
-                "Exception occured during fetching the configuration: {}".format(e)
+                "Exception occured during fetching of shadow: {}".format(e)
             )
-            exit(1)
-
-    def get_config_updates(self):
-        r"""
-        Ipc client creates a request and activates the operation to subscribe to the configuration changes.
-        """
+    
+    def sample_update_thing_shadow_request(thingName, shadowName, payload):
         try:
-            subsreq = SubscribeToConfigurationUpdateRequest()
-            subscribe_operation = ipc_client.new_subscribe_to_configuration_update(
-                ConfigUpdateHandler()
-            )
-            subscribe_operation.activate(subsreq).result(config_utils.TIMEOUT)
-            subscribe_operation.get_response().result(config_utils.TIMEOUT)
+            # create the UpdateThingShadow request
+            update_thing_shadow_request = UpdateThingShadowRequest()
+            update_thing_shadow_request.thing_name = thingName
+            update_thing_shadow_request.shadow_name = shadowName
+            update_thing_shadow_request.payload = payload
+                            
+            # retrieve the UpdateThingShadow response after sending the request to the IPC server
+            op = ipc_client.new_update_thing_shadow()
+            op.activate(update_thing_shadow_request)
+            fut = op.get_response()
+            
+            result = fut.result(config_utils.TIMEOUT)
+            return result.payload
+            
         except Exception as e:
             config_utils.logger.error(
-                "Exception occured during fetching the configuration updates: {}".format(e)
+                "Exception occured while updating shadow: {}".format(e)
             )
-            exit(1)
 
 
-class ConfigUpdateHandler(client.SubscribeToConfigurationUpdateStreamHandler):
-    r"""
-    Custom handle of the subscribed configuration events(steam,error and close).
-    Due to the SDK limitation, another request from within this callback cannot to be sent.
-    Here, it just logs the event details, updates the updated_config to true.
-    """
+class StreamHandler(client.SubscribeToTopicStreamHandler):
+    def __init__(self):
+        super().__init__()
 
-    def on_stream_event(self, event: ConfigurationUpdateEvents) -> None:
-        config_utils.logger.info(event.configuration_update_event)
-        config_utils.UPDATED_CONFIG = True
+    def on_stream_event(self, event: SubscriptionResponseMessage) -> None:
+        try:
+            message_string = str(event.binary_message.message, "utf-8")
+            print(message_string)
+            # Handle message.
+        except:
+            pass
+            #traceback.print_exc()
 
     def on_stream_error(self, error: Exception) -> bool:
-        config_utils.logger.error("Error in config update subscriber - {0}".format(error))
-        return False
+        # Handle error.
+        return True  # Return True to close stream, False to keep stream open.
 
     def on_stream_closed(self) -> None:
-        config_utils.logger.info("Config update subscription stream was closed")
+        # Handle close.
+        pass
 
 
 # Get the ipc client

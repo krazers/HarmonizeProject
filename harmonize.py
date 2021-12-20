@@ -15,6 +15,7 @@
 ########################################
 
 import sys
+import IPCUtils as ipc_utils
 from http_parser.parser import HttpParser
 import argparse
 import requests 
@@ -385,10 +386,14 @@ try:
             t.start()
             threads.append(t)
 
-            input("Press return to stop\n") # Allow us to exit easily
-            stopped=True
-            for t in threads:
-                t.join()
+            ipc_utils.IPCUtils().subscribe_to_cloud
+
+            while True:
+                time.sleep(10)
+            #input("Press return to stop\n") # Allow us to exit easily
+            #stopped=True
+            #for t in threads:
+            #    t.join()
     except Exception as e:
         print(e)
         stopped=True

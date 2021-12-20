@@ -4,7 +4,7 @@
 export region=us-west-2
 export acct_num=$(aws sts get-caller-identity --query "Account" --output text)
 export component_version=1.0.0
-
+export corename = "HueSyncCore"
 # CF parameters
 export demo_name="philipshue"
 #export statustopic="flightdata/status"
@@ -46,11 +46,15 @@ cat ~/GreengrassCore/recipes/$component_name-$component_version.json
 
 uri=s3://$artifact_bucket_name/artifacts/$component_name/$component_version/$component_name.zip
 script="python3 -u {artifacts:decompressedPath}/$component_name/harmonize.py"
+topic="\$aws/things/$corename/shadow/name/tv"
+topic2="$corename/get/accepted"
 json=$(jq --null-input \
   --arg component_name "$component_name" \
   --arg component_version "$component_version" \
   --arg script "$script" \
   --arg uri "$uri" \
+  --arg topic "$topic" \
+  --arg topic2 "$topic2" \
 '{ "RecipeFormatVersion": "2020-01-25", 
 "ComponentName": $component_name, 
 "ComponentVersion": $component_version, 
@@ -59,18 +63,31 @@ json=$(jq --null-input \
 "ComponentConfiguration": {
     "DefaultConfiguration": {
       "accessControl": {
-        "aws.greengrass.ipc.mqttproxy": {
-          "<component_name>:mqttproxy:1": {
-            "policyDescription": "Allows access to subscribe to command topic",
-            "operations": [
-              "aws.greengrass#SubscribeToIoTCore"
-            ],
-            "resources": [
-              "philips/cmd"
-            ]
-          }
+          "aws.greengrass.ShadowManager": {
+              "<component_name>:shadow:1": {   
+                    "policyDescription": "Allows access to shadows",
+                    "operations": [
+                    "aws.greengrass#GetThingShadow",
+                    "aws.greengrass#UpdateThingShadow",
+                    "aws.greengrass#DeleteThingShadow"
+                    ],
+                    "resources": [
+                       $topic
+                    ]
+                }  
+            },     
+            "aws.greengrass.ipc.pubsub": {
+                "<component_name>:pubsub:1": {
+                    "policyDescription": "Allows access to shadow pubsub topics",
+                    "operations": [
+                    "aws.greengrass#SubscribeToTopic"
+                    ],
+                    "resources": [
+                        $topic2
+                    ]
+                }
+            }
         }
-      }
     }
 },
 "Manifests": [ { "Platform": { "os": "linux" }, 
