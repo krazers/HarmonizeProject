@@ -45,7 +45,7 @@ mkdir -p ~/GreengrassCore/recipes/
 cat ~/GreengrassCore/recipes/$component_name-$component_version.json
 
 uri=s3://$artifact_bucket_name/artifacts/$component_name/$component_version/$component_name.zip
-script="python3 -u {artifacts:decompressedPath}/$component_name/harmonize.py"
+script="python3 -m pip install awsiotsdk; python3 -u {artifacts:decompressedPath}/$component_name/harmonize.py"
 topic="\$aws/things/$corename/shadow/name/tv"
 topic2="$corename/get/accepted"
 json=$(jq --null-input \
