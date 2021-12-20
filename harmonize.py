@@ -15,7 +15,7 @@
 ########################################
 
 import sys
-import IPCUtils as ipc_utils
+#import IPCUtils as ipc_utils
 from http_parser.parser import HttpParser
 import argparse
 import requests 
@@ -386,7 +386,7 @@ try:
             t.start()
             threads.append(t)
 
-            ipc_utils.IPCUtils().subscribe_to_cloud
+            #ipc_utils.IPCUtils().subscribe_to_cloud
 
             while True:
                 time.sleep(10)

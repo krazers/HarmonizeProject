@@ -3,7 +3,7 @@
 ###############################################################################
 export region=us-west-2
 export acct_num=$(aws sts get-caller-identity --query "Account" --output text)
-export component_version=1.0.2
+export component_version=1.0.3
 export corename = "HueSyncCore"
 # CF parameters
 export demo_name="philipshue"
@@ -45,7 +45,7 @@ mkdir -p ~/GreengrassCore/recipes/
 cat ~/GreengrassCore/recipes/$component_name-$component_version.json
 
 uri=s3://$artifact_bucket_name/artifacts/$component_name/$component_version/$component_name.zip
-script="python3 -m pip install awsiotsdk; sudo python3 -u {artifacts:decompressedPath}/$component_name/harmonize.py"
+script="python3 -m pip install awsiotsdk; python3 -u {artifacts:decompressedPath}/$component_name/harmonize.py"
 topic="\$aws/things/$corename/shadow/name/tv"
 topic2="$corename/get/accepted"
 json=$(jq --null-input \
