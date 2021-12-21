@@ -3,8 +3,8 @@
 ###############################################################################
 export region=us-west-2
 export acct_num=$(aws sts get-caller-identity --query "Account" --output text)
-export component_version=1.0.4
-export corename = "HueSyncCore"
+export component_version=1.0.5
+corename="HueSyncCore"
 # CF parameters
 export demo_name="philipshue"
 #export statustopic="flightdata/status"
