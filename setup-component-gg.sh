@@ -3,7 +3,7 @@
 ###############################################################################
 export region=us-west-2
 export acct_num=$(aws sts get-caller-identity --query "Account" --output text)
-export component_version=1.0.8
+export component_version=1.0.9
 corename="HueSyncCore"
 # CF parameters
 export demo_name="philipshue"
@@ -76,8 +76,8 @@ json=$(jq --null-input \
                     ]
                 }  
             },     
-            "aws.greengrass.ipc.pubsub": {
-                "<component_name>:pubsub:1": {
+            "aws.greengrass.ipc.mqttproxy": {
+                "<component_name>:mqttproxy:1": {
                     "policyDescription": "Allows access to shadow pubsub topics",
                     "operations": [
                     "aws.greengrass#SubscribeToTopic"
