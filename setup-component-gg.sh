@@ -91,7 +91,7 @@ json=$(jq --null-input \
     }
 },
 "Manifests": [ { "Platform": { "os": "linux" }, 
-"Lifecycle": { "RequiresPrivilege": true, "Run": $script }, 
+"Lifecycle": { "RequiresPrivilege": false, "Run": $script }, 
 "Artifacts": [ { "URI": $uri, 
 "Unarchive": "ZIP", "Permission": { "Read": "ALL", "Execute": "NONE" } } ] } ] }')
 
