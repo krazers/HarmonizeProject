@@ -15,7 +15,7 @@
 ########################################
 
 import sys
-#import IPCUtils as ipc_utils
+import IPCUtils as ipc_utils
 from http_parser.parser import HttpParser
 import argparse
 import requests 
@@ -31,8 +31,7 @@ import cv2
 import math
 import colorconverter
 
-#import config_utils
-#import IPCUtils as ipc_utils
+import config_utils
 #ipc_utils.IPCUtils().publish_results_to_pubsub_ipc(PAYLOAD)
 
 convert = colorconverter.Converter()
@@ -386,7 +385,7 @@ try:
             t.start()
             threads.append(t)
 
-            #ipc_utils.IPCUtils().subscribe_to_cloud
+            ipc_utils.IPCUtils().subscribe_to_cloud
 
             while True:
                 time.sleep(10)
