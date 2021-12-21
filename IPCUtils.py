@@ -17,16 +17,15 @@ from awscrt.io import (
 from awsiot.eventstreamrpc import Connection, LifecycleHandler, MessageAmendment
 from awsiot.greengrasscoreipc.model import (
     QOS,
-    ConfigurationUpdateEvents,
     GetConfigurationRequest,
     PublishToIoTCoreRequest,
     PublishToTopicRequest,
     PublishMessage,
+    IoTCoreMessage,
     JsonMessage,
     GetThingShadowRequest,
     UpdateThingShadowRequest,
-    SubscribeToTopicRequest,
-    SubscriptionResponseMessage
+    SubscribeToIoTCoreRequest
 )
 
 
@@ -94,11 +93,13 @@ class IPCUtils:
             config_utils.logger.error("Exception occured during publish: {}".format(e))
 
     def subscribe_to_cloud(self, topic):
-        config_utils.logger.error("Subscribed to Topic: {}".format(topic))
-        request = SubscribeToTopicRequest()
-        request.topic = topic
+        config_utils.logger.info("Subscribed to Topic: {}".format(topic))
+        qos = QOS.AT_MOST_ONCE
+        request = SubscribeToIoTCoreRequest()
+        request.topic_name = topic
+        request.qos = qos
         handler = StreamHandler()
-        operation = ipc_client.new_subscribe_to_topic(handler) 
+        operation = ipc_client.new_subscribe_to_iot_core(handler)
         future = operation.activate(request)
         future.result(config_utils.TIMEOUT)
 
@@ -162,19 +163,18 @@ class IPCUtils:
                 "Exception occured while updating shadow: {}".format(e)
             )
 
-
-class StreamHandler(client.SubscribeToTopicStreamHandler):
+class StreamHandler(client.SubscribeToIoTCoreStreamHandler):
     def __init__(self):
         super().__init__()
 
-    def on_stream_event(self, event: SubscriptionResponseMessage) -> None:
+    def on_stream_event(self, event: IoTCoreMessage) -> None:
         try:
-            message_string = str(event.binary_message.message, "utf-8")
-            config_utils.logger.error("Message Received: {}".format(message_string))
+            message = str(event.message.payload, "utf-8")
+            topic_name = event.message.topic_name
+            config_utils.logger.info("Message Received: {}".format(message))
             # Handle message.
         except:
             pass
-            #traceback.print_exc()
 
     def on_stream_error(self, error: Exception) -> bool:
         # Handle error.
@@ -183,7 +183,6 @@ class StreamHandler(client.SubscribeToTopicStreamHandler):
     def on_stream_closed(self) -> None:
         # Handle close.
         pass
-
 
 # Get the ipc client
 try:
