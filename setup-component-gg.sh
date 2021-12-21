@@ -3,7 +3,7 @@
 ###############################################################################
 export region=us-west-2
 export acct_num=$(aws sts get-caller-identity --query "Account" --output text)
-export component_version=1.0.9
+export component_version=1.0.10
 corename="HueSyncCore"
 # CF parameters
 export demo_name="philipshue"
@@ -80,7 +80,7 @@ json=$(jq --null-input \
                 "<component_name>:mqttproxy:1": {
                     "policyDescription": "Allows access to shadow pubsub topics",
                     "operations": [
-                    "aws.greengrass#SubscribeToTopic"
+                    "aws.greengrass#SubscribeToIoTCore"
                     ],
                     "resources": [
                         $topic2
