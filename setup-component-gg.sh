@@ -3,7 +3,7 @@
 ###############################################################################
 export region=us-west-2
 export acct_num=$(aws sts get-caller-identity --query "Account" --output text)
-export component_version=1.0.6
+export component_version=1.0.7
 corename="HueSyncCore"
 # CF parameters
 export demo_name="philipshue"
@@ -42,7 +42,7 @@ aws s3 sync ~/GreengrassCore/ s3://$artifact_bucket_name/
 
 # create recipe for component
 mkdir -p ~/GreengrassCore/recipes/
-cat ~/GreengrassCore/recipes/$component_name-$component_version.json
+touch ~/GreengrassCore/recipes/$component_name-$component_version.json
 
 uri=s3://$artifact_bucket_name/artifacts/$component_name/$component_version/$component_name.zip
 script="python3 -m pip install awsiotsdk; python3 -u {artifacts:decompressedPath}/$component_name/harmonize.py"
@@ -87,7 +87,8 @@ json=$(jq --null-input \
                     ]
                 }
             }
-        }
+        },
+        "SubscribeToTopic": $topic2
     }
 },
 "Manifests": [ { "Platform": { "os": "linux" }, 

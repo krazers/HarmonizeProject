@@ -94,6 +94,7 @@ class IPCUtils:
             config_utils.logger.error("Exception occured during publish: {}".format(e))
 
     def subscribe_to_cloud(self, topic):
+        config_utils.logger.error("Subscribed to Topic: {}".format(topic))
         request = SubscribeToTopicRequest()
         request.topic = topic
         handler = StreamHandler()
@@ -101,6 +102,24 @@ class IPCUtils:
         future = operation.activate(request)
         future.result(config_utils.TIMEOUT)
 
+    def get_configuration(self):
+        r"""
+        Ipc client creates a request and activates the operation to get the configuration of
+        inference component passed in its recipe.
+
+        :return: A dictionary object of DefaultConfiguration from the recipe.
+        """
+        try:
+            request = GetConfigurationRequest()
+            operation = ipc_client.new_get_configuration()
+            operation.activate(request).result(config_utils.TIMEOUT)
+            result = operation.get_response().result(config_utils.TIMEOUT)
+            return result.value
+        except Exception as e:
+            config_utils.logger.error(
+                "Exception occured during fetching the configuration: {}".format(e)
+            )
+            exit(1)
     
     def sample_get_thing_shadow_request(thingName, shadowName):
         try:                    
@@ -151,7 +170,7 @@ class StreamHandler(client.SubscribeToTopicStreamHandler):
     def on_stream_event(self, event: SubscriptionResponseMessage) -> None:
         try:
             message_string = str(event.binary_message.message, "utf-8")
-            print(message_string)
+            config_utils.logger.error("Message Received: {}".format(message_string))
             # Handle message.
         except:
             pass

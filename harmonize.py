@@ -324,6 +324,19 @@ def cv2input_to_buffer(): ######### Section opens the device, sets buffer, pulls
                 #verbose('BGrframe is :',bgrframe)
             if not ret: break
 
+def set_configuration(config):
+    r"""
+    Sets a new config object with the combination of updated and default configuration as applicable.
+    Calls inference code with the new config and indicates that the configuration changed.
+    """
+    new_config = {}
+
+    if "SubscribeToTopic" in config:
+        config_utils.TOPIC = config["SubscribeToTopic"]
+    else:
+        config_utils.TOPIC = ""
+        config_utils.logger.warning("Topic to publish inference results is empty.")
+
 
 ######################################################
 ############## Sending the messages ##################
@@ -385,7 +398,8 @@ try:
             t.start()
             threads.append(t)
 
-            ipc_utils.IPCUtils().subscribe_to_cloud
+            set_configuration(ipc_utils.IPCUtils().get_configuration())        
+            ipc_utils.IPCUtils().subscribe_to_cloud(config_utils.TOPIC)
 
             while True:
                 time.sleep(10)
