@@ -94,7 +94,7 @@ class IPCUtils:
 
     def subscribe_to_cloud(self, topic):
         config_utils.logger.info("Subscribed to Topic: {}".format(topic))
-        qos = QOS.AT_MOST_ONCE
+        qos = QOS.AT_LEAST_ONCE
         request = SubscribeToIoTCoreRequest()
         request.topic_name = topic
         request.qos = qos

@@ -7,6 +7,8 @@
 ########################################
 # Github.com/MCPCapital/harmonizeproject
 # Script Last Updated - Release 1.2.0
+# Modifications by Chris Azer, added support
+# for integration with AWS IoT Greengrass v2
 ########################################
 ### -v to enable verbose messages     ##
 ### -g # to pre-select a group number ##
