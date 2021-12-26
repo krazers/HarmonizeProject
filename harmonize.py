@@ -352,33 +352,36 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
     disabledstreaming = False
     time.sleep(1.5) #Hold on so DTLS connection can be made & message format can get defined
     while not stopped:
-        bufferlock.acquire()
-        
-        message = bytes('HueStream','utf-8') + b'\1\0\0\0\0\0\0'
-        if is_single_light:
-            single_light_bytes = bytearray([int(channels[2]/2), int(channels[2]/2), int(channels[1]/2), int(channels[1]/2), int(channels[0]/2), int(channels[0]/2),] ) # channels corrected here from BGR to RGB
-            message += b'\0\0' + bytes(chr(int(1)), 'utf-8') + single_light_bytes
-        else:
-            for i in rgb_bytes:
-                message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
+        try:
+            bufferlock.acquire()
+            
+            message = bytes('HueStream','utf-8') + b'\1\0\0\0\0\0\0'
+            if is_single_light:
+                single_light_bytes = bytearray([int(channels[2]/2), int(channels[2]/2), int(channels[1]/2), int(channels[1]/2), int(channels[0]/2), int(channels[0]/2),] ) # channels corrected here from BGR to RGB
+                message += b'\0\0' + bytes(chr(int(1)), 'utf-8') + single_light_bytes
+            else:
+                for i in rgb_bytes:
+                    message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
 
-        if(lastmessage != message):
-            if(disabledstreaming):
-                enablestreaming()
-                disabledstreaming = False
-            lastmessage = message
-            lastchangetime = datetime.now()
-        else:
-            if((datetime.now()-lastchangetime).total_seconds()>30):
-                disabledstreaming = True
-                disablestreaming()
+            if(lastmessage != message):
+                if(disabledstreaming):
+                    enablestreaming()
+                    disabledstreaming = False
+                lastmessage = message
+                lastchangetime = datetime.now()
 
-        bufferlock.release()
-        proc.stdin.write(message.decode('utf-8','ignore'))
-        time.sleep(.01) #0.01 to 0.02 (slightly under 100 or 50 messages per sec // or (.015 = ~66.6))
-        proc.stdin.flush()
-        #verbose('Wrote message and flushed. Briefly waiting') #This will verbose after every send, spamming the console.
+                bufferlock.release()
+                proc.stdin.write(message.decode('utf-8','ignore'))
+                time.sleep(.01) #0.01 to 0.02 (slightly under 100 or 50 messages per sec // or (.015 = ~66.6))
+                proc.stdin.flush()
+                #verbose('Wrote message and flushed. Briefly waiting') #This will verbose after every send, spamming the console.
+            else:
+                if((datetime.now()-lastchangetime).total_seconds()>30):
+                    disabledstreaming = True
+                    disablestreaming()
 
+        except Exception as e:
+            pass
 
 def disablestreaming():
     verbose("Disabling streaming on Entertainment area")
