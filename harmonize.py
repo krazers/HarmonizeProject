@@ -318,7 +318,7 @@ def cv2input_to_buffer(): ######### Section opens the device, sets buffer, pulls
     while not stopped:
         ct += 1
         ret = cap.grab() #constantly grabs frames
-        if ct % 2 == 0: # Skip frames (1=don't skip,2=skip half,3=skip 2/3rds)
+        if ct % 1 == 0: # Skip frames (1=don't skip,2=skip half,3=skip 2/3rds)
             ret, bgrframe = cap.retrieve() #processes most recent frame
             if is_single_light:
                 channels = cv2.mean(bgrframe)
@@ -365,9 +365,9 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
 
             if(lastmessage != message.decode('utf-8','ignore')):
                 if(disabledstreaming):
+                    print('Enabling Streaming...') 
                     enablestreaming()
                     disabledstreaming = False
-                    print('Enabling Streaming...') 
                 lastmessage = message.decode('utf-8','ignore')
                 lastchangetime = datetime.now()
 
@@ -377,11 +377,15 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
                 proc.stdin.flush()
                 #verbose('Wrote message and flushed. Briefly waiting') #This will verbose after every send, spamming the console.
             else:
-                bufferlock.release()
-                if((datetime.now()-lastchangetime).total_seconds()>30):
-                    print('Disabling Streaming...') 
-                    disabledstreaming = True
-                    disablestreaming()
+                if(disabledstreaming == False):
+                    bufferlock.release()
+                    proc.stdin.write(message.decode('utf-8','ignore'))
+                    time.sleep(.01) #0.01 to 0.02 (slightly under 100 or 50 messages per sec // or (.015 = ~66.6))
+                    proc.stdin.flush()
+                    if((datetime.now()-lastchangetime).total_seconds()>30):
+                        print('Disabling Streaming...') 
+                        disabledstreaming = True
+                        disablestreaming()
 
         except Exception as e:
             pass
