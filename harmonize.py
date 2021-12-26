@@ -348,7 +348,7 @@ def set_configuration(config):
 ######### This is where we define our message format and insert our light#s, RGB values, and X,Y,Brightness ##########
 def buffer_to_light(proc): #Potentially thread this into 2 processes?
     lastchangetime=datetime.now()
-    lastmessage=b'\0\0'
+    lastmessage=None
     disabledstreaming = False
     time.sleep(1.5) #Hold on so DTLS connection can be made & message format can get defined
     while not stopped:
@@ -363,12 +363,12 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
                 for i in rgb_bytes:
                     message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
 
-            if(lastmessage != message):
+            if(lastmessage != message.decode('utf-8','ignore')):
                 if(disabledstreaming):
                     enablestreaming()
                     disabledstreaming = False
                     print('Enabling Streaming...') 
-                lastmessage = message
+                lastmessage = message.decode('utf-8','ignore')
                 lastchangetime = datetime.now()
 
                 bufferlock.release()
@@ -377,6 +377,8 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
                 proc.stdin.flush()
                 #verbose('Wrote message and flushed. Briefly waiting') #This will verbose after every send, spamming the console.
             else:
+                print(lastmessage)
+                print(message.decode('utf-8','ignore'))
                 print('Disabling Streaming...') 
                 if((datetime.now()-lastchangetime).total_seconds()>30):
                     disabledstreaming = True
