@@ -137,7 +137,7 @@ def register():
 
 def enablestreaming():
     ##### Setting up streaming service and calling the DTLS handshake command ######
-    verbose("Enabling streaming on your Entertainment area") #Allows us to send UPD to port 2100
+    print("Enabling streaming on your Entertainment area") #Allows us to send UPD to port 2100
     r = requests.put(url = baseurl+"/{}/groups/{}".format(clientdata['username'],groupid),json={"stream":{"active":True}})
     jsondata = r.json()
 
@@ -394,7 +394,7 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
             pass
 
 def disablestreaming():
-    verbose("Disabling streaming on Entertainment area")
+    print("Disabling streaming on Entertainment area")
     r = requests.put(url = baseurl+"/{}/groups/{}".format(clientdata['username'],groupid),json={"stream":{"active":False}}) 
     jsondata = r.json()
     verbose(jsondata)
