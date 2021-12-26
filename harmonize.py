@@ -367,6 +367,7 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
                 if(disabledstreaming):
                     enablestreaming()
                     disabledstreaming = False
+                    verbose('Enabling Streaming...') 
                 lastmessage = message
                 lastchangetime = datetime.now()
 
@@ -376,6 +377,7 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
                 proc.stdin.flush()
                 #verbose('Wrote message and flushed. Briefly waiting') #This will verbose after every send, spamming the console.
             else:
+                verbose('Disabling Streaming...') 
                 if((datetime.now()-lastchangetime).total_seconds()>30):
                     disabledstreaming = True
                     disablestreaming()
