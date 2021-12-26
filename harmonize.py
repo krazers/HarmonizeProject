@@ -318,7 +318,7 @@ def cv2input_to_buffer(): ######### Section opens the device, sets buffer, pulls
     while not stopped:
         ct += 1
         ret = cap.grab() #constantly grabs frames
-        if ct % 1 == 0: # Skip frames (1=don't skip,2=skip half,3=skip 2/3rds)
+        if ct % 2 == 0: # Skip frames (1=don't skip,2=skip half,3=skip 2/3rds)
             ret, bgrframe = cap.retrieve() #processes most recent frame
             if is_single_light:
                 channels = cv2.mean(bgrframe)
