@@ -378,14 +378,17 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
                 #verbose('Wrote message and flushed. Briefly waiting') #This will verbose after every send, spamming the console.
             else:
                 if(disabledstreaming == False):
-                    bufferlock.release()
-                    proc.stdin.write(message.decode('utf-8','ignore'))
-                    time.sleep(.01) #0.01 to 0.02 (slightly under 100 or 50 messages per sec // or (.015 = ~66.6))
-                    proc.stdin.flush()
                     if((datetime.now()-lastchangetime).total_seconds()>30):
                         print('Disabling Streaming...') 
                         disabledstreaming = True
                         disablestreaming()
+                        bufferlock.release()
+                    else: 
+                        bufferlock.release()
+                        proc.stdin.write(message.decode('utf-8','ignore'))
+                        time.sleep(.01) #0.01 to 0.02 (slightly under 100 or 50 messages per sec // or (.015 = ~66.6))
+                        proc.stdin.flush()
+                    
 
         except Exception as e:
             pass
