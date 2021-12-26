@@ -379,8 +379,8 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
             else:
                 print(lastmessage)
                 print(message.decode('utf-8','ignore'))
-                print('Disabling Streaming...') 
                 if((datetime.now()-lastchangetime).total_seconds()>30):
+                    print('Disabling Streaming...') 
                     disabledstreaming = True
                     disablestreaming()
 
