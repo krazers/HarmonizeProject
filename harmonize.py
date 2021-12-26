@@ -384,7 +384,6 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
                     disablestreaming()
 
         except Exception as e:
-            bufferlock.release()
             pass
 
 def disablestreaming():
