@@ -365,7 +365,7 @@ def buffer_to_light(): #Potentially thread this into 2 processes?
                 for i in rgb_bytes:
                     message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
 
-            if(str(lastmessage) != str(message)):
+            if(str(lastmessage) != str(message) or True):
                 if(disabledstreaming):
                     print('Enabling Streaming...') 
                     disabledstreaming = False
