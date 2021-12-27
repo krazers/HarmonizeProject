@@ -410,6 +410,7 @@ def disablestreaming():
 ######################################################
 
 def initialize():
+    stopped = False
     setup()
     ######### Section executes video input and establishes the connection stream to bridge ##########
     try:
@@ -458,4 +459,3 @@ def initialize():
 while True:
     print("Initializing...")
     initialize()
-    stopped=False
