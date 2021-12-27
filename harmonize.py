@@ -348,7 +348,7 @@ def set_configuration(config):
 ######### This is where we define our message format and insert our light#s, RGB values, and X,Y,Brightness ##########
 def buffer_to_light(proc): #Potentially thread this into 2 processes?
     lastchangetime=datetime.now()
-    lastmessage=None
+    lastmessage=bytes('HueStream','utf-8')
     disabledstreaming = False
     time.sleep(1.5) #Hold on so DTLS connection can be made & message format can get defined
     while not stopped:
@@ -363,7 +363,7 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
                 for i in rgb_bytes:
                     message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
 
-            if(lastmessage != message):
+            if(str(lastmessage) != str(message)):
                 if(disabledstreaming):
                     print('Enabling Streaming...') 
                     enablestreaming()
