@@ -363,12 +363,12 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
                 for i in rgb_bytes:
                     message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
 
-            if(lastmessage != message.decode('utf-8','ignore')):
+            if(lastmessage != message):
                 if(disabledstreaming):
                     print('Enabling Streaming...') 
                     enablestreaming()
                     disabledstreaming = False
-                lastmessage = message.decode('utf-8','ignore')
+                lastmessage = message
                 lastchangetime = datetime.now()
 
                 bufferlock.release()
