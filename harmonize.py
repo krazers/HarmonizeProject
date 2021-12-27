@@ -46,7 +46,7 @@ parser.add_argument("-s","--single_light", dest="single_light", action="store_tr
 commandlineargs = parser.parse_args()
 
 is_single_light = False
-
+stopped = False
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
     
@@ -142,7 +142,7 @@ def enablestreaming():
     jsondata = r.json()
 
 def setup():
-    global light_locations, clientdata, hueip, groupid, bufferlock, stopped
+    global light_locations, clientdata, hueip, groupid, bufferlock
     #verbose("Finding bridge...")
     (hueip,port),headers = findhue() or ((None,None),None)
     if hueip is None:
