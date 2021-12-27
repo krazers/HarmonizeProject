@@ -366,7 +366,7 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
             if(str(lastmessage) != str(message)):
                 if(disabledstreaming):
                     print('Enabling Streaming...') 
-                    enablestreaming()
+                    setup()
                     disabledstreaming = False
                 lastmessage = message
                 lastchangetime = datetime.now()
