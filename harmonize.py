@@ -346,7 +346,9 @@ def set_configuration(config):
 ######################################################
 
 ######### This is where we define our message format and insert our light#s, RGB values, and X,Y,Brightness ##########
-def buffer_to_light(proc): #Potentially thread this into 2 processes?
+def buffer_to_light(): #Potentially thread this into 2 processes?
+    cmd = ["openssl","s_client","-dtls1_2","-cipher","PSK-AES128-GCM-SHA256","-psk_identity",clientdata['username'],"-psk",clientdata['clientkey'], "-connect", hueip+":2100"]
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)            
     lastchangetime=datetime.now()
     lastmessage=bytes('HueStream','utf-8')
     disabledstreaming = False
@@ -366,8 +368,8 @@ def buffer_to_light(proc): #Potentially thread this into 2 processes?
             if(str(lastmessage) != str(message)):
                 if(disabledstreaming):
                     print('Enabling Streaming...') 
-                    setup()
                     disabledstreaming = False
+                    stopped=True #Force a rstart     
                 lastmessage = message
                 lastchangetime = datetime.now()
 
@@ -435,21 +437,18 @@ def initialize():
                     threads.append(t)
                 time.sleep(.25) #Initialize and find bridge IP before creating connection
                 verbose("Opening SSL stream to lights...")
-                cmd = ["openssl","s_client","-dtls1_2","-cipher","PSK-AES128-GCM-SHA256","-psk_identity",clientdata['username'],"-psk",clientdata['clientkey'], "-connect", hueip+":2100"]
-                proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
-                t = threading.Thread(target=buffer_to_light, args=(proc,))
+                t = threading.Thread(target=buffer_to_light)
                 t.start()
                 threads.append(t)
 
                 set_configuration(ipc_utils.IPCUtils().get_configuration())        
                 ipc_utils.IPCUtils().subscribe_to_cloud(config_utils.TOPIC)
 
-                while True:
+                while not stopped:
                     time.sleep(10)
-                #input("Press return to stop\n") # Allow us to exit easily
-                #stopped=True
-                #for t in threads:
-                #    t.join()
+                
+                for t in threads:
+                    t.join()
         except Exception as e:
             print(e)
 
@@ -459,3 +458,4 @@ def initialize():
 while True:
     print("Initializing...")
     initialize()
+    stopped=False
