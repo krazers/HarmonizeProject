@@ -365,35 +365,37 @@ def buffer_to_light(): #Potentially thread this into 2 processes?
                 for i in rgb_bytes:
                     message += b'\0\0' + bytes(chr(int(i)), 'utf-8') + rgb_bytes[i]
 
-            if(str(lastmessage) != str(message) or True):
-                if(disabledstreaming):
-                    print('Enabling Streaming...') 
-                    disabledstreaming = False
-                    stopped=True #Force a rstart     
-                lastmessage = message
-                lastchangetime = datetime.now()
+            lastmessage = message
+            lastchangetime = datetime.now()
 
-                bufferlock.release()
-                proc.stdin.write(message.decode('utf-8','ignore'))
-                time.sleep(.01) #0.01 to 0.02 (slightly under 100 or 50 messages per sec // or (.015 = ~66.6))
-                proc.stdin.flush()
+            bufferlock.release()
+            proc.stdin.write(message.decode('utf-8','ignore'))
+            time.sleep(.01) #0.01 to 0.02 (slightly under 100 or 50 messages per sec // or (.015 = ~66.6))
+            proc.stdin.flush()
+
+            #if(str(lastmessage) != str(message) or True):
+            #    if(disabledstreaming):
+            #        print('Enabling Streaming...') 
+            #        disabledstreaming = False
+            #        stopped=True #Force a rstart     
+                
                 #verbose('Wrote message and flushed. Briefly waiting') #This will verbose after every send, spamming the console.
-            else:
-                if(disabledstreaming == False):
-                    if((datetime.now()-lastchangetime).total_seconds()>15):
-                        print('Disabling Streaming...') 
-                        disabledstreaming = True
-                        disablestreaming()
-                        bufferlock.release()
-                        time.sleep(.01)
-                    else: 
-                        bufferlock.release()
-                        proc.stdin.write(message.decode('utf-8','ignore'))
-                        time.sleep(.01) #0.01 to 0.02 (slightly under 100 or 50 messages per sec // or (.015 = ~66.6))
-                        proc.stdin.flush()
-                else:
-                    bufferlock.release()
-                    time.sleep(.01)
+            #else:
+            #    if(disabledstreaming == False):
+            #        if((datetime.now()-lastchangetime).total_seconds()>15):
+            #            print('Disabling Streaming...') 
+            #            disabledstreaming = True
+            #            disablestreaming()
+            #            bufferlock.release()
+            #            time.sleep(.01)
+            #        else: 
+            #            bufferlock.release()
+            #            proc.stdin.write(message.decode('utf-8','ignore'))
+            #            time.sleep(.01) #0.01 to 0.02 (slightly under 100 or 50 messages per sec // or (.015 = ~66.6))
+            #            proc.stdin.flush()
+            #    else:
+            #        bufferlock.release()
+            #        time.sleep(.01)
 
 
         except Exception as e:
